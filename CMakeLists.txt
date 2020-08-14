@@ -4,8 +4,8 @@ project(EndlessSpace VERSION 0.1.0)
 cmake_policy(SET CMP0072 NEW)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "-g3")
+set(CMAKE_CXX_FLAGS_RELEASE "-g3")
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)

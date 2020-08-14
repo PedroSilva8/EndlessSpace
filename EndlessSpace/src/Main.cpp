@@ -72,6 +72,14 @@ int main(void) {
         Renderer::Swap();
     }
 
-    glfwTerminate();
-    return 0;
+    ObjectsHandler::Clear();
+    InterfaceManager::Clear();
+    ShaderManager::Clear();
+    MeshManager::Clear();
+    CollisionManager::Clear();
+    Renderer::RendererClear();
+    UpdateManager::Clear();
+    Input::InputClear();
+    Window::Clear();
+    _exit(0);
 }
