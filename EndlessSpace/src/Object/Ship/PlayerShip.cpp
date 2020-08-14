@@ -3,6 +3,21 @@
 #include "Core/MeshManager.hpp"
 #include "Core/UpdateManager.hpp"
 #include "Graphics/Renderer.hpp"
+#include "InterfaceObject/CustomObjects/Button.hpp"
+#include "InterfaceObject/InterfaceManager.hpp"
+
+void Test() {
+    Debug::Alert("You CLicked A Button!!!");
+}
+
+PlayerShip::PlayerShip() {
+    Button *btn = new Button();
+    btn->Text = "Test Button";
+    btn->wConstraint = RELATIVE;
+    btn->Size = Vector2(5, 40);
+    btn->OnClick = Test;
+    InterfaceManager::AddObject(btn);
+}
 
 void PlayerShip::Load() {
     
@@ -59,11 +74,4 @@ void PlayerShip::OnCollision(RayTestResult result) {
             acceleration = speed / orbitDistance;
         }
     }
-}
-
-    
-void PlayerShip::PosRender() {
-
-    for (size_t Index = 0; Index < UpdateManager::Groups.size(); Index++)
-        Renderer::DrawText("Arial", "Update Group " + to_string(Index) + " Time - " + to_string(UpdateManager::Groups[Index]->UpdateTime.count()), Vector2(0, 20 * Index), 0.4, Vector3(1, 1, 1));
 }

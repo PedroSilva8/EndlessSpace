@@ -10,8 +10,11 @@ int main(void) {
     Renderer::Init();
     CollisionManager::Init();
     InterfaceManager::Init();
-
-    InterfaceManager::AddObject(new InterfaceObject());
+    
+    DebugData *dbData = new DebugData();
+    dbData->Position = Vector2(0, 0);
+    dbData->ForegroundColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+    InterfaceManager::AddObject(dbData);
 
     ObjectsHandler::Load();
 
@@ -66,8 +69,10 @@ int main(void) {
         ObjectsHandler::ExecuteCode(UPDATE);
         while (!CollisionManager::Work.empty()) { }
         ObjectsHandler::ExecuteCode(RENDER);
-        InterfaceManager::ExecuteCode(RENDER);
         ObjectsHandler::ExecuteCode(POSRENDER);
+        Renderer::SetDepthMask(false);
+        InterfaceManager::ExecuteCode(RENDER);
+        Renderer::SetDepthMask(true);
         Input::Clear();
         Renderer::Swap();
     }

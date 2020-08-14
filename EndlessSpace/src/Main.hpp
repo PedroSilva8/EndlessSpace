@@ -1,7 +1,6 @@
 #ifndef _MAIN_
 #define _MAIN_
 
-
 #include "Graphics/Renderer.hpp"
 #include "Core/ObjectsHandler.hpp"
 #include "Core/Camera.hpp"
@@ -13,5 +12,7 @@
 #include "Object/Asteroids/Asteroid.hpp"
 #include "Object/Ship/PlayerShip.hpp"
 #include "InterfaceObject/InterfaceManager.hpp"
+#include "InterfaceObject/CustomObjects/Button.hpp"
+#include "Interface/DebugData.hpp"
 
 #endif
