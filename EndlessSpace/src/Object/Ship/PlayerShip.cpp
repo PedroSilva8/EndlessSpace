@@ -5,9 +5,13 @@
 #include "Graphics/Renderer.hpp"
 #include "InterfaceObject/CustomObjects/Button.hpp"
 #include "InterfaceObject/InterfaceManager.hpp"
+#include "InterfaceObject/CustomObjects/Image.hpp"
+
+Image* img;
 
 void Test() {
     Debug::Alert("You CLicked A Button!!!");
+    img->Active = !img->Active;
 }
 
 PlayerShip::PlayerShip() {
@@ -17,6 +21,10 @@ PlayerShip::PlayerShip() {
     btn->Size = Vector2(5, 40);
     btn->OnClick = Test;
     InterfaceManager::AddObject(btn);
+    img = new Image();
+    img->Position = Vector2(200, 200);
+    img->texture = TextureManager::GetTexture("Data/Textures/Test.png");
+    InterfaceManager::AddObject(img);
 }
 
 void PlayerShip::Load() {

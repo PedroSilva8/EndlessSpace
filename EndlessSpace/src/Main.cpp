@@ -10,7 +10,8 @@ int main(void) {
     Renderer::Init();
     CollisionManager::Init();
     InterfaceManager::Init();
-    
+    TextureManager::Init();    
+
     DebugData *dbData = new DebugData();
     dbData->Position = Vector2(0, 0);
     dbData->ForegroundColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -81,6 +82,7 @@ int main(void) {
     InterfaceManager::Clear();
     ShaderManager::Clear();
     MeshManager::Clear();
+    TextureManager::Clear();
     CollisionManager::Clear();
     Renderer::RendererClear();
     UpdateManager::Clear();

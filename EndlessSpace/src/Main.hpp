@@ -7,6 +7,7 @@
 #include "Core/TimeHelper.hpp"
 #include "Core/ShaderManager.hpp"
 #include "Core/MeshManager.hpp"
+#include "Core/TextureManager.hpp"
 #include "Core/UpdateManager.hpp"
 #include "Object/Skybox.hpp"
 #include "Object/Asteroids/Asteroid.hpp"
