@@ -8,9 +8,11 @@ target_link_libraries(EndlessSpace glfw)
 target_link_libraries(EndlessSpace OpenGL::GL)
 target_link_libraries(EndlessSpace ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(EndlessSpace OpenCL)
+target_link_libraries(EndlessSpace ${Vulkan_LIBRARIES})
 
 target_link_libraries(EndlessSpace GameEngine)
 
+target_include_directories(EndlessSpace PUBLIC ${Vulkan_INCLUDE_DIR})
 target_link_libraries(EndlessSpace ${FREETYPE_LIBRARIES})
 target_include_directories(EndlessSpace PUBLIC ${FREETYPE_INCLUDE_DIRS})
 target_compile_options(EndlessSpace PUBLIC ${FREETYPE_CGLAGS_OTHER})

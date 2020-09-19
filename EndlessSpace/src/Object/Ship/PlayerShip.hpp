@@ -8,7 +8,7 @@ public:
     Mesh* movementMesh;
 
     PlayerShip();
-
+    
     void Load() override;
     void Update() override;
     void OnCollision(RayTestResult result) override;

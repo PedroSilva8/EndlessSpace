@@ -1,36 +1,110 @@
 #include "Main.hpp"
+#include "Core/Window.hpp"
+#include "Core/FileManager.hpp"
+#include "Core/Debug.hpp"
+#include "Core/MeshManager.hpp"
+#include "Graphics/Vulkan/Vulkan.hpp"
+#include "Graphics/Vulkan/VulkanDeviceManager.hpp"
+#include "Graphics/Vulkan/PipelineManager.hpp"
+#include "Graphics/Vulkan/RenderPassManager.hpp"
+#include "Graphics/Vulkan/VulkanFramebuffer.hpp"
+#include "Graphics/Vulkan/VulkanCommandBuffer.hpp"
+#include "Graphics/Vulkan/VulkanSemaphore.hpp"
+#include "Graphics/Vulkan/VulkanOffScreenManager.hpp"
+#include "Graphics/Renderer.hpp"
+#include "Graphics/TextRenderer.hpp"
+#include "Core/TextureManager.hpp"
+#include "Graphics/Vulkan/VulkanDescriptorPool.hpp"
+#include "Core/Camera.hpp"
+#include "Core/TimeHelper.hpp"
+#include "Collisions/CollisionManager.hpp"
+#include "Core/ObjectsHandler.hpp"
+#include "Core/ShaderManager.hpp"
+#include "Core/UpdateManager.hpp"
+#include "Object/Ship/PlayerShip.hpp"
+#include "Object/Asteroids/Asteroid.hpp"
+#include "Object/Skybox.hpp"
+#include "InterfaceObject/InterfaceManager.hpp"
+#include "InterfaceObject/CustomObjects/Image.hpp"
+#include "Interface/DebugData.hpp"
+#include "Graphics/Vulkan/CommandPoolManager.hpp"
 
 int main(void) {
 
     FileManager::UpdateGamePath();
     Window::Setup();
-
-    ShaderManager::Init();
-    MeshManager::Init();
-    Renderer::Init();
     CollisionManager::Init();
+    ShaderManager::Init();
+    ObjectsHandler::Load();
     InterfaceManager::Init();
-    TextureManager::Init();    
+
+    ///Setup Vulkan
+    Vulkan::CreateInstance(InstanceData { "Vulkan", "Vulkan", VK_MAKE_VERSION(0, 1, 0), VK_MAKE_VERSION(0, 1, 0) });
+    Vulkan::SetupDebugMessenger();
+    Vulkan::CreateSurface();
+    VulkanDeviceManager::UpdatePhysicalDevices();
+    VulkanDeviceManager::CreateLogicalDevice();
+    Vulkan::CreateSwapChain();
+    Vulkan::CreateImageViews();
+
+    CommandBufferManager::commandPool = new VulkanCommandPool();
+    CommandBufferManager::commandPool->CreatePool();
+
+    Vulkan::CreateDepthResources();
+    VulkanSemaphore::CreateSemaphores();
+
+    ///Load Default Vulkan Stuff
+    VulkanRenderPass* renderPass = new VulkanRenderPass();
+    renderPass->PrepareRenderPass();
+    renderPass->renderPassData.attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    renderPass->renderPassData.attachments[0].initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    renderPass->renderPassData.attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    renderPass->renderPassData.attachments[1].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    renderPass->CreateRenderPass();
+    renderPass->Name = "Default";
+
+    RenderPassManager::AddRenderPass(renderPass);
+
+    renderPass = new VulkanRenderPass();
+    renderPass->PrepareRenderPass();
+    renderPass->CreateRenderPass();
+    renderPass->Name = "Clear";
+
+    RenderPassManager::AddRenderPass(renderPass);
+
+    VulkanFramebuffer* frameBuffer = new VulkanFramebuffer();
+    frameBuffer->CreateFramebuffers(renderPass);
+
+    Vulkan::frameBuffer = frameBuffer;
+
+    Debug::Log("Finished Loading Vulkan Starting Game");
+
+    //Load Game
+    //Renderer::Init();
+    TextRenderer::Init();
 
     DebugData *dbData = new DebugData();
     dbData->Position = Vector2(0, 0);
     dbData->ForegroundColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
     InterfaceManager::AddObject(dbData);
 
-    ObjectsHandler::Load();
+    Image* btn = new Image();
+    btn->texture = TextureManager::GetTexture("Data/Textures/Test.png");
+    btn->BackgroundColor = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
+    InterfaceManager::AddObject(btn);
 
     UpdateManager::CreateGroup("Asteroids1");
     UpdateManager::CreateGroup("Asteroids2");
     UpdateManager::CreateGroup("Others");
 
     Object *skybox = new Object();
+    skybox->Tag = "Skybox";
     Skybox *skyComp = new Skybox();
     skybox->AddComponent(skyComp);
-    skyComp->LoadSkybox("Data/Skybox/SkyWater.skybox", "Data/Meshes/Teste.obj", "Data/Shaders/Skybox.shader");
+    skyComp->LoadSkybox("Data/Skybox/SmallRuralRoad.hdr", "Data/Meshes/Teste.obj", "Data/Shaders/Skybox.shader");
     UpdateManager::AddToGroup("Others", skybox);
     ObjectsHandler::AddObject(skybox);
-    
-    ///Ship
+
     Object* ship = new Object();
     ship->Tag = "Ship";
     ship->AddComponent(new PlayerShip());
@@ -46,6 +120,7 @@ int main(void) {
         UpdateManager::AddToGroup("Asteroids1", a);
         ObjectsHandler::AddObject(a);
     }
+
     for (int Index = 0; Index < 10; Index++){
         Object* a = new Object();
         a->Tag = "Asteroid G2 N" + to_string(Index);
@@ -56,37 +131,60 @@ int main(void) {
 
     InterfaceManager::ExecuteCode(LOAD);
     ObjectsHandler::ExecuteCode(LOAD);
-
-    glfwSwapInterval(0);
-
     TimeHelper::Start();
+    
+    ObjectsHandler::ExecuteCode(PRERENDER);
+    InterfaceManager::ExecuteCode(PRERENDER);
 
     while (!glfwWindowShouldClose(Window::window)) {
-
         TimeHelper::Update();
+
+        glfwPollEvents();
+
+        if (Vulkan::SwapChainRecreated) {
+            ObjectsHandler::ExecuteCode(PRERENDER);
+            InterfaceManager::ExecuteCode(PRERENDER);
+        }
+
+        Vulkan::PrepareFrame();
         Renderer::Clear();
         Camera::Update();
+        TextRenderer::BeginTextUpdate();
         InterfaceManager::ExecuteCode(UPDATE);
         ObjectsHandler::ExecuteCode(UPDATE);
         while (!CollisionManager::Work.empty()) { }
         ObjectsHandler::ExecuteCode(RENDER);
         ObjectsHandler::ExecuteCode(POSRENDER);
-        Renderer::SetDepthMask(false);
         InterfaceManager::ExecuteCode(RENDER);
-        Renderer::SetDepthMask(true);
+        InterfaceManager::ExecuteCode(POSRENDER);
+        TextRenderer::EndTextUpdate();
         Input::Clear();
-        Renderer::Swap();
+        Vulkan::DrawFrame();
+        CommandBufferManager::commandPool->drawQueue.clear();
     }
 
+    vkDeviceWaitIdle(VulkanDeviceManager::GetSelectedDevice());
+    
+    ObjectsHandler::ExecuteCode(CLEAN);
+    InterfaceManager::ExecuteCode(CLEAN);
+
+    TextRenderer::Clean();
+    TextureManager::Clear();
     ObjectsHandler::Clear();
     InterfaceManager::Clear();
-    ShaderManager::Clear();
-    MeshManager::Clear();
-    TextureManager::Clear();
     CollisionManager::Clear();
-    Renderer::RendererClear();
-    UpdateManager::Clear();
-    Input::InputClear();
+    MeshManager::Clear();
+    ShaderManager::Clear();
+    VulkanSemaphore::Clean();
+    CommandBufferManager::Clear();
+    frameBuffer->Clean();
+    PipelineManager::CleanPipelines();
+    RenderPassManager::ClearRenderPass();
+    VulkanOffScreenManager::Clean();
+    CommandPoolManager::Clean();
+    Vulkan::Clean();
+    Input::Clear();
     Window::Clear();
+
     _exit(0);
 }
