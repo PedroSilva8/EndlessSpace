@@ -8,6 +8,13 @@
 #include "Graphics/Renderer.hpp"
 #include "Mesh/Mesh.hpp"
 #include "Graphics/TextRenderer.hpp"
+#include <math.h>
+
+MenuOption::MenuOption(string OptionName, PointerFunctionData onClick, Vector3 Color) {
+    Name = OptionName;
+    OnClick = onClick;
+    data.Color = Color;
+}
 
 PieMenu::PieMenu() {
     innerRadius = 50.0f;
@@ -16,6 +23,7 @@ PieMenu::PieMenu() {
     options = vector<MenuOption*>();
     circleDetail = 16;
     shader = nullptr;
+    PointerFunctionData* OnClick = nullptr;
 }
 
 void PieMenu::Load() {
@@ -71,6 +79,17 @@ void PieMenu::AddOption(MenuOption* option) {
     option->uniformData->Generate(shader);
 }
 
+bool PieMenu::GetOption(string OptionName, MenuOption* option) {
+    for (MenuOption* menuOption : options) {
+        if (menuOption->Name == OptionName) {
+            option = menuOption;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void PieMenu::PreRender() {
     commandBuffer = CommandBufferManager::GetOrCreate("Interface - " + Tag);
     Vulkan::commandBuffer = commandBuffer;
@@ -103,6 +122,10 @@ void PieMenu::PreRender() {
     ExecuteChildren(PRERENDER);
 }
 
+float AreClockwise(Vector2 Left, Vector2 Right)  {
+    return - Left.X * Right.Y + Left.Y * Right.X > 0;
+}
+
 void PieMenu::Update() {
     if (!Active)
         return;
@@ -111,20 +134,32 @@ void PieMenu::Update() {
     float Offset = 0;
 
     for (size_t Index = 0; Index < Size; Index++) {
-        Offset += optionSize + distanceBetweenOptions;
-
         options[Index]->data.projection = Window::OrthoProjection;
         options[Index]->data.Center = Position;
         options[Index]->data.innerRadius = innerRadius / outterRadius;
         options[Index]->data.Angle = (optionSize) / 180.0f - (0.04f * Size);
         options[Index]->data.Rotation = Offset;
         options[Index]->uniformData->GetUniform("PieData")->UpdateUniform(&options[Index]->data);
+
+        Offset += optionSize + distanceBetweenOptions;
     }
 
     if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_LEFT)) {
-        Vector2 MousePosition = Abs(Input::MousePosition - Position);
-        if (MousePosition < Vector2(outterRadius, outterRadius))
-            OnClick.F(OnClick.Param);
+        Vector2 MousePosition = Input::MousePosition - Position;
+        
+        float MouseAngle = atan2f(MousePosition.Y, MousePosition.X);
+        MouseAngle = (MouseAngle > 0 ? MouseAngle : (2 * M_PI + MouseAngle)) * 360 / (2 * M_PI) + optionSize / 2;
+        
+        if (MouseAngle > 360.0f)
+            MouseAngle -= 360.0f;
+
+        Vector2 AbsoluteMousePosition = Abs(MousePosition);
+        if (AbsoluteMousePosition.X * AbsoluteMousePosition.X + AbsoluteMousePosition.Y * AbsoluteMousePosition.Y <= outterRadius * outterRadius &&
+            AbsoluteMousePosition.X * AbsoluteMousePosition.X + AbsoluteMousePosition.Y * AbsoluteMousePosition.Y >= innerRadius * innerRadius)
+            for (MenuOption* option : options)
+                if (option->data.Rotation < MouseAngle && MouseAngle < option->data.Rotation + optionSize)
+                    if (option->OnClick.F != nullptr)
+                        option->OnClick.F(option->OnClick.Param);
     }
 
     ExecuteChildren(UPDATE);

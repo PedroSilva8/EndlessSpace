@@ -1,23 +1,11 @@
 #include "SpaceObject.hpp"
-#include "Graphics/Renderer.hpp"
-#include "Core/Camera.hpp"
-#include "Core/ShaderManager.hpp"
-#include "Core/MeshManager.hpp"
 #include "Collisions/CollisionManager.hpp"
-#include "Core/TextureManager.hpp"
-#include "Graphics/Vulkan/PipelineManager.hpp"
-#include "Graphics/Vulkan/RenderPassManager.hpp"
+#include "Object/Render/MeshRenderer.hpp"
 
 SpaceObject::SpaceObject() {
     isOrbitable = true;
-}
-
-void SpaceObject::LoadObject(const char* Shader, const char* Model) {
-
-    shader = ShaderManager::GetShader(Shader);
-    mesh = MeshManager::GetMesh(Model);
-    if (!mesh->AttributesProcessed)
-        mesh->ProcessAttributes(GL_FLOAT, sizeof(float), shader);
+    texture = nullptr;
+    mesh = nullptr;
 }
 
 void SpaceObject::LoadCollider(Mesh* colliderMesh) {
@@ -28,64 +16,23 @@ void SpaceObject::LoadCollider(Mesh* colliderMesh) {
     CollisionManager::AddCollider(collider);
 }
 
-void SpaceObject::Load() {
-    if (shader == nullptr)
-        LoadObject("Data/Shaders/Tutorial.shader", "Data/Meshes/Default.obj");
-    
-    uniformData.PrepareUniforms(shader);
-    uniformData.GetUniform("MVP")->Generate(sizeof(Matrix4));
-    uniformData.GetUniform("texSampler")->SetTexture((texture == nullptr ? TextureManager::GetTexture("Data/Textures/texture.jpg") : texture));
-    uniformData.Generate(shader);
+void SpaceObject::LoadObject(const char* Shader, const char* Model) {
 
-    pipeLine = new VulkanPipeLine();
-    pipeLine->PreparePipelineLayout();
-    pipeLine->SetVertexInputInfo(Vertex::GetBindingDescription(), Vertex::GetAttributeDescriptions());
-    pipeLine->CreatePipelineLayout(&uniformData);
-    pipeLine->CreatePipeline(shader, RenderPassManager::GetRenderPass("Default"));
-    pipeLine->Name = "BasicPipeline";
+    ///Check If mesh is Set If Not Get Component
+    if (mesh == nullptr)
+        mesh = object->GetComponent<MeshRenderer>();
+    ///Second Check To See If There Is No Component of Type Mesh In That Case Create And Add
+    if (mesh == nullptr) {
+        mesh = new MeshRenderer();
+        object->AddComponent(mesh);
+    }
 
-    PipelineManager::AddPipeline(pipeLine);
+    mesh->PrepareObject(Shader, Model, texture);
+    mesh->uniformData->GetUniform("MVP")->Generate(sizeof(Matrix4));
+    if (texture != nullptr)
+        mesh->uniformData->GetUniform("texSampler")->SetTexture(texture);
+    mesh->LoadObject("SpaceObjectUniform");
 
     if (collider == nullptr)
-        LoadCollider(mesh);
-}
-
-void SpaceObject::PreRender() {
-    commandBuffer = CommandBufferManager::GetOrCreate(object->Tag);
-    Vulkan::commandBuffer = commandBuffer;
-    for (size_t Index = 0; Index < commandBuffer->commandBuffers.size(); Index++) {
-        Vulkan::CurrentCommandBuffer = Index;
-
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-        if (vkBeginCommandBuffer(Vulkan::GetCurrentCommandBuffer(), &beginInfo) != VK_SUCCESS)
-            Debug::Error("failed to begin recording command buffer!");
-
-        Renderer::Prepare();
-
-        pipeLine->Bind();
-        mesh->Bind();
-        uniformData.Bind(pipeLine);
-        mesh->Draw();
-        
-        vkCmdEndRenderPass(Vulkan::GetCurrentCommandBuffer());
-
-        if (vkEndCommandBuffer(Vulkan::GetCurrentCommandBuffer()) != VK_SUCCESS)
-            Debug::Error("failed to record command buffer!");
-    }
-}
-
-void SpaceObject::Update() {
-
-    model = Camera::ProjectionView * object->transform.ModelMatrix();
-    uniformData.GetUniform("MVP")->UpdateUniform(&model);
-}
-
-void SpaceObject::Render() {
-    CommandBufferManager::AddToQueuePool(commandBuffer);
-}
-
-void SpaceObject::Clean() {
-     uniformData.Clean();
+        LoadCollider(mesh->mesh);
 }

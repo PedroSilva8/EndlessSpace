@@ -7,6 +7,7 @@
 #include "InterfaceObject/InterfaceManager.hpp"
 #include "../../Interface/PieMenu.hpp"
 #include "Object/Debug/RayDraw.hpp"
+#include "Object/Render/MeshRenderer.hpp"
 
 SpaceObject* obj;
 Vector3 PossibleTarget;
@@ -26,11 +27,18 @@ void OrbitX(void* Pointer) {
     }
 }
 
+void Green(void* Pointer) {
+    Debug::Log("Hit Green");
+}
+
+void Blue(void* Pointer) {
+    Debug::Log("Hit Blue");
+}
+
 PlayerShip::PlayerShip() {
     menu = new PieMenu();
     menu->Active = false;
     menu->Tag = "PieMenu";
-    menu->OnClick = { OrbitX, this};
     InterfaceManager::AddObject(menu);
 }
 
@@ -38,7 +46,7 @@ void PlayerShip::Load() {
     
     texture = TextureManager::GetTexture("Data/Textures/Test.png");
     LoadObject("Data/Shaders/Tutorial.shader", "Data/Meshes/Main Ship.obj");
-    LoadCollider(mesh);
+    LoadCollider(mesh->mesh);
 
     Ship::Load();
 
@@ -50,12 +58,10 @@ void PlayerShip::Load() {
     Camera::Position = Vector3(0, 0, 10);
     Camera::Zoom = 10;
 
-    menu->AddOption(new MenuOption());
-    menu->AddOption(new MenuOption());
-    menu->AddOption(new MenuOption());
-    menu->AddOption(new MenuOption());
-    menu->AddOption(new MenuOption());
-    menu->ChangePosition(Vector2(200, 400));
+    menu->AddOption(new MenuOption("Orbit", { OrbitX, this }, Vector3(1.0f, 0.0f, 0.0f)));
+    menu->AddOption(new MenuOption("Attack", { Green, this }, Vector3(0.0f, 1.0f, 0.0f)));
+    menu->AddOption(new MenuOption("Look", { Blue, this }, Vector3(0.0f, 0.0f, 1.0f)));
+    menu->ChangePosition(Vector2(0, 0));
 }
 
 bool MenuNeedsUpdate = false;
@@ -86,15 +92,14 @@ void PlayerShip::Update() {
             object->transform.localRotation = Quaternion::Slerp(object->transform.localRotation, lookRotation, TimeHelper::GetDeltaTime());
     }
 
-    Ship::Update();
-
     if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_LEFT) && !InterfaceManager::Interacted) {
         menu->Active = false;
     }
 }
 
 void PlayerShip::OnCollision(RayTestResult result) {
-    Debug::Log("Something Was Hit" + result.result[0]->Hitted->object->Tag);
+    Debug::Log("Something Was Hit " + result.result[0]->Hitted->object->Tag);
+
     if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_RIGHT)) {
         menu->ChangePosition(Input::MousePosition);
         menu->Active = true;

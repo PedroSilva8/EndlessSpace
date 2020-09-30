@@ -88,11 +88,6 @@ int main(void) {
     dbData->ForegroundColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
     InterfaceManager::AddObject(dbData);
 
-    Image* btn = new Image();
-    btn->texture = TextureManager::GetTexture("Data/Textures/Test.png");
-    btn->BackgroundColor = Vector4(1.0f, 1.0f, 0.0f, 1.0f);
-    InterfaceManager::AddObject(btn);
-
     UpdateManager::CreateGroup("Asteroids1");
     UpdateManager::CreateGroup("Asteroids2");
     UpdateManager::CreateGroup("Others");
@@ -141,12 +136,13 @@ int main(void) {
 
         glfwPollEvents();
 
+        Vulkan::PrepareFrame();
+
         if (Vulkan::SwapChainRecreated) {
             ObjectsHandler::ExecuteCode(PRERENDER);
             InterfaceManager::ExecuteCode(PRERENDER);
         }
 
-        Vulkan::PrepareFrame();
         Renderer::Clear();
         Camera::Update();
         TextRenderer::BeginTextUpdate();

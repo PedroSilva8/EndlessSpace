@@ -13,30 +13,36 @@
 using namespace std;
 
 class Texture;
+class MeshRenderer;
 
 class SpaceObject : public Component {
 public:
-    Mesh* mesh;
-    Shader* shader;
+    /* Space Object Texture */
     Texture* texture;
+    /* Space Object Collider */
     Collider* collider;
-    VulkanPipeLine* pipeLine;
-    VulkanCommandBuffer* commandBuffer;
-    VulkanDescriptor uniformData;
-    
+    /* Space Object Mesh*/
+    MeshRenderer* mesh;
+
+    /* Space Object Model Matrix Data (Position, Rotation, Scale) */
     Matrix4 model;
 
+    /* Is Space Object Orbitable */
     bool isOrbitable;
 
     SpaceObject();
 
+    /**
+    * Load Space Object
+    * @param Shader The Shader Location To Be Used
+    * @param Model The Model Location To Be Used
+    */
     void LoadObject(const char* Shader, const char* Model);
+    /**
+    * Load Collider From Mesh
+    * @param Collider The Mesh To Be Used To Create The Collider
+    */
     void LoadCollider(Mesh* Collider);
-    virtual void Load() override;
-    virtual void Update() override;
-    virtual void PreRender() override;
-    virtual void Render() override;
-    virtual void Clean() override;
 };
 
 #endif
