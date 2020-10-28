@@ -28,6 +28,8 @@
 #include "InterfaceObject/CustomObjects/Image.hpp"
 #include "Interface/DebugData.hpp"
 #include "Graphics/Vulkan/CommandPoolManager.hpp"
+#include "Object/Ship/EnemyShip.hpp"
+#include "Object/Ship/ShipAddonDataManager.hpp"
 
 int main(void) {
 
@@ -100,12 +102,31 @@ int main(void) {
     UpdateManager::AddToGroup("Others", skybox);
     ObjectsHandler::AddObject(skybox);
 
+    ShipAddonData* addonData = new ShipAddonData();
+    addonData->Name = "Laser I";
+    addonData->Type = "Laser";
+    addonData->MeshLocation = "Data/Meshes/Missel Wepon.obj";
+    addonData->ShaderLocation = "Data/Shaders/Tutorial.shader";
+    addonData->TextureLocation = "Data/Textures/Test.png";
+
+    ShipAddonDataManager::AddAddonData(addonData);
+
     Object* ship = new Object();
-    ship->Tag = "Ship";
-    ship->AddComponent(new PlayerShip());
+    ship->Tag = "PlayerShip";
+    PlayerShip* playerShip = new PlayerShip();
+    playerShip->AddAddon("Laser I", Vector3(11.0f, 1.14099f, -2.45f), Quaternion::EulerToQuaternion(Vector3(0.0f, 45.9f, 0.0f)));
+    ship->AddComponent(playerShip);
 
     UpdateManager::AddToGroup("Others", ship);
     ObjectsHandler::AddObject(ship);
+
+    Object* enemyShip = new Object();
+    enemyShip->transform.localPosition = Vector3(10, 10, 10);
+    enemyShip->Tag = "EnemyShip";
+    enemyShip->AddComponent(new EnemyShip());
+
+    UpdateManager::AddToGroup("Others", enemyShip);
+    ObjectsHandler::AddObject(enemyShip);
 
     ///Asteroids
     for (int Index = 0; Index < 10; Index++) {

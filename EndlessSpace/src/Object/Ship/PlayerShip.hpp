@@ -3,9 +3,13 @@
 
 #include "Ship.hpp"
 
+class PieMenu;
+
 class PlayerShip : public Ship {
 public:
-    Mesh* movementMesh;
+
+    SpaceObject* target;
+    PieMenu* menu;
 
     PlayerShip();
     

@@ -23,7 +23,11 @@ public:
     Collider* collider;
     /* Space Object Mesh*/
     MeshRenderer* mesh;
-
+    /* Space Object Type */
+    string ObjectType;
+    /* Space Object Size */
+    float Size;
+    
     /* Space Object Model Matrix Data (Position, Rotation, Scale) */
     Matrix4 model;
 
