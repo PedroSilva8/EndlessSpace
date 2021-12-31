@@ -71,5 +71,6 @@
         "forward_list": "cpp",
         "typeindex": "cpp",
         "semaphore": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
 }
