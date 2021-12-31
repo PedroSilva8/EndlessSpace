@@ -1,2 +1,2 @@
 # EndlessSpace
-A Open Source Space Game
+A Open Source MVRE Demo
