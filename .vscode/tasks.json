@@ -1,0 +1,34 @@
+{
+    "tasks": [
+        {
+            "label": "Compile Shaders",
+            "type": "shell",
+            "command": "${workspaceFolder}/EndlessSpace/src/Data/Shaders/compile.sh",
+        },
+        {
+            "label": "Prepare CMake",
+            "type": "shell",
+            "command": "mkdir -p build && cd build && cmake -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/x86_64-pc-linux-gnu-gcc-11.1.0 -DCMAKE_BUILD_TYPE=Debug .."
+        },
+        {
+            "label": "Compile Code",
+            "type": "shell",
+            "command": "cd build && make"
+        },
+        {
+            "label": "Build",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Compile Shaders",
+                "Prepare CMake",
+                "Compile Code"
+            ]
+        },
+        {
+            "label": "clear",
+            "type": "shell",
+            "command": "rm -r ./build"
+        }
+    ],
+    "version": "2.0.0"
+}

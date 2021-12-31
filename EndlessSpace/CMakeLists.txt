@@ -10,7 +10,7 @@ target_link_libraries(EndlessSpace ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(EndlessSpace OpenCL)
 target_link_libraries(EndlessSpace ${Vulkan_LIBRARIES})
 
-target_link_libraries(EndlessSpace GameEngine)
+target_link_libraries(EndlessSpace MVRE)
 
 target_include_directories(EndlessSpace PUBLIC ${Vulkan_INCLUDE_DIR})
 target_link_libraries(EndlessSpace ${FREETYPE_LIBRARIES})

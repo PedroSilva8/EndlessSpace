@@ -90,61 +90,6 @@ int main(void) {
     dbData->ForegroundColor = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
     InterfaceManager::AddObject(dbData);
 
-    UpdateManager::CreateGroup("Asteroids1");
-    UpdateManager::CreateGroup("Asteroids2");
-    UpdateManager::CreateGroup("Others");
-
-    Object *skybox = new Object();
-    skybox->Tag = "Skybox";
-    Skybox *skyComp = new Skybox();
-    skybox->AddComponent(skyComp);
-    skyComp->LoadSkybox("Data/Skybox/SmallRuralRoad.hdr", "Data/Meshes/Teste.obj", "Data/Shaders/Skybox.shader");
-    UpdateManager::AddToGroup("Others", skybox);
-    ObjectsHandler::AddObject(skybox);
-
-    ShipAddonData* addonData = new ShipAddonData();
-    addonData->Name = "Laser I";
-    addonData->Type = "Laser";
-    addonData->MeshLocation = "Data/Meshes/Missel Wepon.obj";
-    addonData->ShaderLocation = "Data/Shaders/Tutorial.shader";
-    addonData->TextureLocation = "Data/Textures/Test.png";
-
-    ShipAddonDataManager::AddAddonData(addonData);
-
-    Object* ship = new Object();
-    ship->Tag = "PlayerShip";
-    PlayerShip* playerShip = new PlayerShip();
-    playerShip->AddAddon("Laser I", Vector3(11.0f, 1.14099f, -2.45f), Quaternion::EulerToQuaternion(Vector3(0.0f, 45.9f, 0.0f)));
-    ship->AddComponent(playerShip);
-
-    UpdateManager::AddToGroup("Others", ship);
-    ObjectsHandler::AddObject(ship);
-
-    Object* enemyShip = new Object();
-    enemyShip->transform.localPosition = Vector3(10, 10, 10);
-    enemyShip->Tag = "EnemyShip";
-    enemyShip->AddComponent(new EnemyShip());
-
-    UpdateManager::AddToGroup("Others", enemyShip);
-    ObjectsHandler::AddObject(enemyShip);
-
-    ///Asteroids
-    for (int Index = 0; Index < 10; Index++) {
-        Object* a = new Object();
-        a->Tag = "Asteroid G1 N" + to_string(Index);
-        a->AddComponent(new Asteroid());
-        UpdateManager::AddToGroup("Asteroids1", a);
-        ObjectsHandler::AddObject(a);
-    }
-
-    for (int Index = 0; Index < 10; Index++){
-        Object* a = new Object();
-        a->Tag = "Asteroid G2 N" + to_string(Index);
-        a->AddComponent(new Asteroid());
-        UpdateManager::AddToGroup("Asteroids2", a);
-        ObjectsHandler::AddObject(a);
-    }
-
     InterfaceManager::ExecuteCode(LOAD);
     ObjectsHandler::ExecuteCode(LOAD);
     TimeHelper::Start();
@@ -169,7 +114,9 @@ int main(void) {
         TextRenderer::BeginTextUpdate();
         InterfaceManager::ExecuteCode(UPDATE);
         ObjectsHandler::ExecuteCode(UPDATE);
+        
         while (!CollisionManager::Work.empty()) { }
+
         ObjectsHandler::ExecuteCode(RENDER);
         ObjectsHandler::ExecuteCode(POSRENDER);
         InterfaceManager::ExecuteCode(RENDER);
