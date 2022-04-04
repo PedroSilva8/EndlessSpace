@@ -8,17 +8,17 @@
         {
             "label": "Copy Data",
             "type": "shell",
-            "command": "cp -r ${workspaceFolder}/EndlessSpace/src/Data/* ${workspaceFolder}/build/EndlessSpace/Data",
+            "command": "mkdir -p ${workspaceFolder}/build/EndlessSpace/Data && cp -r ${workspaceFolder}/EndlessSpace/src/Data/* ${workspaceFolder}/build/EndlessSpace/Data",
         },
         {
             "label": "Prepare CMake",
             "type": "shell",
-            "command": "mkdir -p build && cd build && cmake -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/x86_64-pc-linux-gnu-gcc-11.1.0 -DCMAKE_BUILD_TYPE=Debug .."
+            "command": "mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug .."
         },
         {
             "label": "Compile Code",
             "type": "shell",
-            "command": "cd build && make"
+            "command": "cd build && make -j16"
         },
         {
             "label": "Build",

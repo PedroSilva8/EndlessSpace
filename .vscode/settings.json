@@ -70,7 +70,8 @@
         "variant": "cpp",
         "forward_list": "cpp",
         "typeindex": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "numbers": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

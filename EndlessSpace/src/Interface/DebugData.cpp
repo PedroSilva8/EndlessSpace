@@ -18,11 +18,9 @@ void DebugData::PosRender() {
         Frames = 0;
     }
 
-    ///1000000ns = 1ms
-    for (size_t Index = 0; Index < UpdateManager::Groups.size(); Index++)
-        TextRenderer::AddText("Update Group " + to_string(Index) + " Time - MiliSeconds " + to_string(UpdateManager::Groups[Index]->UpdateTime.count() / 1000000UL) + " NanoSeconds" + to_string(UpdateManager::Groups[Index]->UpdateTime.count()), Vector2(RenderPosition.X, RenderPosition.Y + 13 * 2 * Index), 2);
+    int64_t totalTime = ObjectsHandler::UpdateTime.count() + ObjectsHandler::RenderTime.count();
 
-    TextRenderer::AddText("Update Time - MiliSeconds " + to_string(ObjectsHandler::UpdateTime.count() / 1000000UL) + " NanoSeconds" + to_string(ObjectsHandler::UpdateTime.count()), Vector2(RenderPosition.X, RenderPosition.Y + 13 * 2 * UpdateManager::Groups.size()), 2);
-    TextRenderer::AddText("Render Time - MiliSeconds " + to_string(ObjectsHandler::RenderTime.count() / 1000000UL) + " NanoSeconds" + to_string(ObjectsHandler::RenderTime.count()), Vector2(RenderPosition.X, RenderPosition.Y + 13 * 2 * (UpdateManager::Groups.size() + 1)), 2);
-    TextRenderer::AddText("FPS - " + to_string((int)FrameRate), Vector2(RenderPosition.X, RenderPosition.Y + 13 * 2 * (UpdateManager::Groups.size() + 2)), 2);
+    TextRenderer::AddText("Update Time - Perc " + to_string((ObjectsHandler::UpdateTime.count() * 100 / totalTime)) + "% MiliSeconds " + to_string(ObjectsHandler::UpdateTime.count() / 1000000UL) + " NanoSeconds" + to_string(ObjectsHandler::UpdateTime.count()), Vector2(RenderPosition.X, RenderPosition.Y), 2);
+    TextRenderer::AddText("Render Time - Perc " + to_string((ObjectsHandler::RenderTime.count() * 100 / totalTime)) + "% MiliSeconds " + to_string(ObjectsHandler::RenderTime.count() / 1000000UL) + " NanoSeconds" + to_string(ObjectsHandler::RenderTime.count()), Vector2(RenderPosition.X, RenderPosition.Y + 13 * 2), 2);
+    TextRenderer::AddText("FPS " + to_string((int)FrameRate), Vector2(RenderPosition.X, RenderPosition.Y + 13 * 3 + 5), 2);
 }

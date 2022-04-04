@@ -7,7 +7,6 @@ add_custom_command(TARGET EndlessSpace PRE_BUILD COMMAND ${CMAKE_COMMAND} -E cop
 target_link_libraries(EndlessSpace glfw)
 target_link_libraries(EndlessSpace OpenGL::GL)
 target_link_libraries(EndlessSpace ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(EndlessSpace OpenCL)
 target_link_libraries(EndlessSpace ${Vulkan_LIBRARIES})
 
 target_link_libraries(EndlessSpace MVRE)

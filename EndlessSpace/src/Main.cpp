@@ -27,7 +27,7 @@ int main(void) {
     skybox->Tag = "Skybox";
     Skybox *skyComp = new Skybox();
     skybox->AddComponent(skyComp);
-    skyComp->LoadSkybox("Data/HDR/park.hdr", "Data/Meshes/Cube.obj", "Data/Shaders/Skybox.shader");
+    skyComp->LoadSkybox("Data/HDR/space.hdr", "Data/Meshes/Cube.obj", "Data/Shaders/Skybox.shader");
     
     UpdateManager::AddToGroup("Others", skybox);
     ObjectsHandler::AddObject(skybox);

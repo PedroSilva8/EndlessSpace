@@ -13,7 +13,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Threads REQUIRED)
-find_package(OpenCL REQUIRED)
 find_package(PkgConfig REQUIRED) 
 find_package(Vulkan REQUIRED)
 
